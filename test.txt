@@ -5,3 +5,8 @@ third change
 add a new branch dev
 change on master
 second change on master
+make more different on dev
+when dev and master has many different
+add a new branch
+what will happen
+this diffirent is on master

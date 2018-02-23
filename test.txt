@@ -10,3 +10,9 @@ when dev and master has many different
 add a new branch
 what will happen
 this diffirent is on master
+one make more conflect on master 
+two make more conflect on master
+three make more conflect on master
+four make more conflect on master
+five make more conflect on master
+six make more conflect on master

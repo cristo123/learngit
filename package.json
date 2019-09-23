@@ -1,0 +1,27 @@
+{
+  "name": "learn-git",
+  "version": "0.0.0",
+  "description": "my gnarly project",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "slide": "mdx-deck website/deck.mdx",
+    "slide:build": "mdx-deck build website/deck.mdx --no-html",
+    "now-build": "npm run slide:build"
+  },
+  "author": "qiujuan<18279185327@163.com>",
+  "license": "MIT",
+  "dependencies": {
+    "mdx-deck": "1.10.2",
+    "mdx-deck-code-surfer": "^0.5.5",
+    "postcss": "^7.0.14",
+    "postcss-selector-parser": "^6.0.2",
+    "raw-loader": "^2.0.0"
+  },
+  "devDependencies": {
+    "chalk": "^2.4.2",
+    "style-search": "^0.1.0",
+    "styled-components": "^4.2.0"
+  }
+}

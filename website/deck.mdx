@@ -1,0 +1,336 @@
+export { default as theme } from './src/index'
+import { Head, Image, Notes, Appear } from 'mdx-deck'
+import nightOwl from 'prism-react-renderer/themes/nightOwl'
+import { CodeSurfer } from 'mdx-deck-code-surfer'
+import { LayoutNoFooter, Layout, Split, BGImage } from './src/index'
+// import { Appear } from 'mdx-deck/components'
+
+<Head>
+  <title>Git</title>
+</Head>
+
+export default Layout
+
+# Git
+
+> author cristo
+
+---
+
+## 主题
+
+1. 什么是Git?
+
+2. Git的基本用法
+
+3. Git几大工作流对比
+
+4. 如何选择适合的Git工作流？
+
+5. Git的一些奇淫技巧
+
+---
+
+export default Layout
+
+## 什么是Git ?
+
+<Notes>
+  <li> 从2005年创建至今，惊人数量的软件项目依赖git进行版本管理。相信大多数人刚开始使用的时候，都难以理解，什么是分布式架构</li>
+  <li> 分布式架构和集中式架构，典型代表分别是Git/SVN，所谓集中式，简单来说就是中心化，所以的操作都依赖于中心服务器，所有的用户在提交代码前都需要先从服务器上拉回服务器的当前版本。一旦服务器挂了，将没有办法进行工作</li>
+  <li> 那所谓分布式，就是去中心化，每个用户都有个完整的库，就是我们常说的本地仓库，每个人都基于自己的本地仓库进行开发，即使离线，依然可以提交。</li>
+  <li> 也许你会说，我们平时不是也是要把自己的修改推送到远程仓库吗，难道这不是中心，不，这不是中心，我们所谓的远程仓库，其实也是一个用户，我们任何一个人都可以作为这个角色，实际上你也可以pull张三的库，然后push给李四等等</li>
+  <li> Git支持绝大多数的操作系统和IDE</li>
+</Notes>
+
+---
+
+### Git
+
+<ul>
+  <Appear>
+  <li>最广泛使用的现代软件版本管理系统</li>
+  <li>一个成熟并处于活跃开发的开源项目</li>
+  <li>分布式架构</li>
+  <li>支持绝大多数的操作系统和IDE</li>
+  </Appear>
+</ul>
+---
+
+## Git的基本用法
+
+---
+
+export default Split
+
+- git add
+- git commit
+- get pull
+- git push
+
+---
+
+### git 仓库
+
+Create a config like `.eslintrc`, `.eslintrc.js`, or in `packageProps`.
+
+---
+
+<CodeSurfer
+  theme={nightOwl}
+  lang="json"
+  code={`
+    {
+      "extends": [
+        "plugin:vue/essential",
+        "@vue/prettier"
+      ]
+    }
+  `}
+/>
+
+---
+
+### step 3
+
+Combine with `husky` & `lint-staged` in git hooks like `pre-commit`.
+
+---
+
+<CodeSurfer
+  theme={nightOwl}
+  lang="json"
+  code={`
+  {
+    "husky": {
+      "hooks": {
+        "pre-commit": "lint-staged"
+      }
+    },
+    "lint-staged": {
+      "*.js": [
+        "prettier --write",
+        "standard --fix",
+        "git add"
+      ],
+      "*.{json,md}": [
+        "prettier --write",
+        "git add"
+      ]
+    }
+  }
+  `}
+/>
+
+---
+
+## 你清楚它们是如何运作的吗?
+
+---
+
+<CodeSurfer
+  theme={nightOwl}
+  lang="bash"
+  code={`
+    eslint . --fix
+  `}
+/>
+
+<Notes>
+  <li>当我们从命令行中键入 这串字符的时候 他背后实际上执行了什么样的操作呢，接下来我们就会稍微具体的讲下这个过程是如何实现的</li>
+  <li>在深入代码前，让我们说下 AST 这个东西。 </li>
+</Notes>
+
+---
+
+### 开始制作一个简单 linter (BASE ON CSS)
+
+---
+
+export default Split
+
+使用 4 个分支讲述 linter 实现
+
+- step-1-base
+- step-2-cosmiconfig
+- step-3-cli
+- step-4-unittest
+
+---
+
+<Notes>
+  <li>为什么按照4个分支来讲，一般来说。</li>
+  <ol>转换函数</ol>
+  <ol>规则</ol>
+  <ol>有良好的信息输出，良好的信息输出标识，错误提示和修复建议 </ol>
+  <ol>可自定义配置文件 </ol>
+  <ol>cli, 命令行工具 </ol>
+  <ol>单元测试，随着功能增多，我们需要保证代码的质量</ol>
+  <li>接下来就用一些代码来讲述这个过程</li>
+</Notes>
+
+### step-1-base
+
+---
+
+<CodeSurfer
+  theme={nightOwl}
+  title="selector-type-case"
+  lang="js"
+  code={require('!raw-loader!../snippets/selector-type-case.snippet.js').default}
+  steps={[
+    { notes: 'rules for css' },
+    { lines: [9], notes: 'walkRules for root' },
+    { lines: [10], notes: 'get description of selector' },
+    { lines: [11], notes: 'get tags of the selector description' },
+    { lines: [12], notes: 'get value' },
+    { range: [26, 32], notes: 'report message if not need fix' }
+  ]}
+/>
+
+---
+
+<CodeSurfer
+  theme={nightOwl}
+  title="reportMessage"
+  lang="js"
+  code={require('!raw-loader!../snippets/report.snippet.js').default}
+/>
+
+---
+
+### step-2-cosmiconfig
+
+
+<Notes>
+  <li>前面看到有 .eslintrc .eslint.config.js 这些配置文件，里面定义的就是他的配置</li>
+</Notes>
+
+
+---
+
+<CodeSurfer
+  theme={nightOwl}
+  title="SearchPlaces"
+  lang="json"
+  code={`
+    [
+      'package.json'
+      '.eslintrc',
+      '.eslintrc.json',
+      '.eslintrc.yaml',
+      '.eslintrc.yml',
+      '.eslintrc.js',
+      '.eslint.config.js'
+    ]
+  `}
+/>
+
+---
+
+<CodeSurfer
+  theme={nightOwl}
+  title="Get config"
+  lang="js"
+  code={`
+    const cosmiconfig = require('cosmiconfig')\n
+    function getConfig (configName = 'clint') {
+      const explorer = cosmiconfig(configName)
+      const searchResult = explorer.searchSync()
+      if (!searchResult) {
+        throw new TypeError('Please provide the config')
+      }
+      return searchResult.config
+    }
+  `}
+  steps={[
+    { notes: 'get config for our custom name `clint`' },
+    { lines: [5], notes: 'init explorer' },
+    { lines: [8], notes: 'throw an error' }
+  ]}
+/>
+
+---
+
+### step-3-cli
+
+---
+
+<CodeSurfer
+  theme={nightOwl}
+  title="Init CLI"
+  lang="js"
+  code={`
+    #!/usr/bin/env node
+    const cac = require('cac')
+    const { version } = require('./package.json')
+    const main = require('./src/index')
+    const cli = cac()\n
+    cli
+      .command('<files>', 'use globby pattern match the files')
+      .option('--config <configPath>', 'specify the clint config')
+      .option('--fix', 'fix the error')
+      .allowUnknownOptions()
+      .action((path, options) => {
+        main(path, options)
+      })\n
+    cli.help()
+    cli.version(version)
+    cli.parse()
+  `}
+  steps={[
+    { lines: [9], notes: 'specify input files' },
+    { range: [10, 12], notes: 'accept options' }
+  ]}
+/>
+
+---
+
+### step-4-unittest
+
+---
+
+<CodeSurfer
+  theme={nightOwl}
+  title="Add unit test"
+  lang="js"
+  code={require('!raw-loader!../snippets/test.snippets.js').default}
+  steps={[
+    { notes: 'add test' },
+    { tokens: { 3: [4, 5, 6, 7, 8, 9] } },
+    { tokens: { 9: [3, 4, 5, 6, 7] } }
+  ]}
+/>
+
+---
+
+<CodeSurfer
+  theme={nightOwl}
+  lang="diff"
+  code={require('!raw-loader!../snippets/diff').default}
+  steps={[
+    { range: [1, 2], notes: '`A` tag was transformed to lower case' },
+    { range: [7, 8], notes: '`UL LI` tags were transformed to lower case' }
+  ]}
+/>
+
+---
+
+
+1. 你使用过哪些 linter ?
+
+2. 你知道如何使用它们吗?
+
+3. 你清楚它们是如何运作的吗?
+
+4. 制作一个简化版的 linter.
+
+---
+
+### [https://lint.eliaztray.cn](https://lint.eliaztray.cn)
+
+### [https://github.com/eliaztray/lint-demo](https://github.com/eliaztray/lint-demo)
+
+---
+
+# Thank You!

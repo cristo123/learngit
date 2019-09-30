@@ -1,6 +1,6 @@
 
 import BGImage from './bg-image'
-import CodeSanbox from './codeSanbox'
+import CodeSanbox from './CodeSanBox'
 import LayoutNoFooter from './layout-no-footer'
 import Layout from './layout'
 import Split from './Split'

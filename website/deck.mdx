@@ -1,5 +1,5 @@
 export { default as theme } from './src/index'
-import { Head, Image, Notes, Appear } from 'mdx-deck'
+import { Head, Image, Notes, Appear, Provider } from 'mdx-deck'
 import nightOwl from 'prism-react-renderer/themes/nightOwl'
 import { CodeSurfer } from 'mdx-deck-code-surfer'
 import { LayoutNoFooter, Layout, Split, BGImage } from './src/index'
@@ -25,28 +25,23 @@ export default Layout
 
 3. Git几大工作流对比
 
-4. 如何选择适合的Git工作流？
-
-5. Git的一些奇淫技巧
+4. 选择适合的Git工作流
 
 ---
-
+<!-- 
 export default Layout
 
 ## 什么是Git ?
 
 <Notes>
-  <li> 从2005年创建至今，惊人数量的软件项目依赖git进行版本管理。相信大多数人刚开始使用的时候，都难以理解，什么是分布式架构</li>
+  <li> 从2005年创建至今，惊人数量的软件项目依赖git进行版本管理。</li>
   <li> 分布式架构和集中式架构，典型代表分别是Git/SVN，所谓集中式，简单来说就是中心化，所以的操作都依赖于中心服务器，所有的用户在提交代码前都需要先从服务器上拉回服务器的当前版本。一旦服务器挂了，将没有办法进行工作</li>
   <li> 那所谓分布式，就是去中心化，每个用户都有个完整的库，就是我们常说的本地仓库，每个人都基于自己的本地仓库进行开发，即使离线，依然可以提交。</li>
   <li> 也许你会说，我们平时不是也是要把自己的修改推送到远程仓库吗，难道这不是中心，不，这不是中心，我们所谓的远程仓库，其实也是一个用户，我们任何一个人都可以作为这个角色，实际上你也可以pull张三的库，然后push给李四等等</li>
   <li> Git支持绝大多数的操作系统和IDE</li>
-</Notes>
+</Notes> -->
 
----
-
-### Git
-
+## 什么是Git ?
 <ul>
   <Appear>
   <li>最广泛使用的现代软件版本管理系统</li>
@@ -58,71 +53,251 @@ export default Layout
 ---
 
 ## Git的基本用法
-
 ---
-
 export default Split
 
+-  git init
+- git clone
 - git add
 - git commit
 - get pull
 - git push
+- git branch
+- git checkout
+##
+- git merge
+- git rebase
+- git reset
+- git revert
+- git cherry-pick
+- git diff
+- git describe
+
 
 ---
 
-### git 仓库
+### git相关的一些基本概念
+
+---
+
+### 工作区(working tree / working directory)
+
+---
+
+### 暂存区 / stage / 索引 / index
+<ul>
+  <Appear>
+  <li>暂存区是Git中的重要概念，当对工作区修改/新增/删除文件执行git add 命令之后，就会产生一个新com纪录存入暂存区中</li>
+  </Appear>
+</ul>
+
+---
+
+### 版本库
+<ul>
+  <Appear>
+  <li>当你执行了`git init`命令之后，会产生一个隐藏文件，`.git`，这个就是版本库</li>
+  </Appear>
+</ul>
 
 ---
 
 <CodeSurfer
+  title=".git 目录结构"
   theme={nightOwl}
   lang="json"
-  code={`
-    {
-      "extends": [
-        "plugin:vue/essential",
-        "@vue/prettier"
-      ]
-    }
-  `}
+  code={`-rw-r--r--    1  staff     9B Aug  8 17:21 COMMIT_EDITMSG
+  -rw-r--r--    1  staff    89B Aug  9 10:23 FETCH_HEAD
+  -rw-r--r--    1  staff    23B Aug  9 10:01 HEAD
+  -rw-r--r--    1  staff    41B Aug  8 17:21 ORIG_HEAD
+  -rw-r--r--    1  staff   361B May 29 18:28 config
+  -rw-r--r--    1  staff    73B May 29 18:26 description
+  drwxr-xr-x   13  staff   416B May 29 18:26 hooks
+  -rw-r--r--    1  staff    19K Aug  8 17:21 index
+  drwxr-xr-x    3  staff    96B May 29 18:26 info
+  drwxr-xr-x    4  staff   128B May 29 18:27 logs
+  drwxr-xr-x  150  staff   4.7K Aug  8 17:21 objects
+  drwxr-xr-x    5  staff   160B May 29 18:28 refs`}
+  showNumbers={true}
+  steps={[
+    { lines: [1], notes: "COMMIT_EDITMSG存放了你最近一个提交的提交信息" },
+    { lines: [2], notes: "FETCH_HEAD是一个短期引用，用于跟踪刚刚从远程存储库中获取的内容，存放了各个分支从远端获取的最顶端分支的commit sha1" },
+    { lines: [3], notes: "HEAD是一个游标，当我们创建版本库的时候，git会主动为我们传创建一个分支，master, 此时HEAD指向master最近的一个提交,如果你切换到dev分支了，那么HEAD指向的就是dev分支最近的一个提交" },
+    { lines: [4], notes: "ORIG_HEAD保存的也是提交记录的sha1，当执行一些风险操作的时候，比如rebase，reset或merge的时候，Git会将原来HEAD执行的commit保存在ORIG_HEAD中。" },
+    { lines: [7], notes: "hooks,顾名思义，钩子，里面存放了多种钩子文件，都是.sample后缀，是示例文件，不生效，去掉.sample后缀才生效，比如pre-commit.sample文件，这个钩子在执行`git commit`之前被调用，我们在项目中使用的husky+lint-staged就是改了这个钩子文件来实现提交前的校验" },
+    { lines: [8], notes: "index即暂存区" },
+    { lines: [11], notes: "objects存放了所有的git对象" },
+    { lines: [12], notes: "refs保存了各个本地分支和远程分支以及tags当前所指向的提交，HEAD和refs的关系： HEAD -> refs/heads/branchName -> commit" },
+  ]}
 />
 
 ---
 
-### step 3
+### git init
 
-Combine with `husky` & `lint-staged` in git hooks like `pre-commit`.
+<ul>
+  <Appear>
+    <li>生成一个git版本库，在当前目录下生成一个隐藏文件.git</li>
+  </Appear>
+</ul>
 
+---
+
+### git clone
+
+-  创建一个本地仓库的克隆版本 
+- `git clone path/to/repository`
+- 从远端服务器上克隆一个版本库 
+- `git clone username@host:/path/to/repository`
+
+---
+### git add
+
+- 将指定文件添加到暂存区 
+- `git add path/to/file`
+- 将当前目录下所有工作区的改动添加到暂存中
+- `git add .`
+- (-A --all) 添加工作区下所有的改动
+- `git add -A`
+
+---
+### git commit
+
+- 将暂存区的内容生成一个commit提交记录保存到本地版本库中
+- `git commit -m "commit message"`
+- 修改最近一次提交的提交信息
+- `git commit --amend`
+---
+<Notes>Fetch from and integrate with another repository or a local branch，从另一个仓库或者本地分支获取并与之集成</Notes>
+<CodeSurfer
+  theme={nightOwl}
+  title="git pull"
+  lang="json"
+  code={`
+  // 从另一个仓库或者本地分支获取并与之集成
+  git pull [options] [<repository> [<refspec>]]
+  git pull origin dev:dev
+  git fetch origin
+  git merge orign/dev
+  git pull origin dev
+  git pull origin
+  git pull
+  git pull --rebase`}
+  steps={[
+    { notes: '' },
+    { lines: [3], notes: '完整用法  $ git pull <远程主机名> <远程分支名>:<本地分支名>' },
+    { range: [4, 6], notes: 'git pull其实是一个简写，包括git fetch 和git merge FETCH_HEAD这两个命令' },
+    { lines: [7], notes: 'pull的默认行为是merge到你当前所在的分支，所以想要pull到当前分支的话冒号后面的本地分支名可以省略' },
+    { lines: [8], notes: '如果origin/dev分支与当前dev分支建立了追踪关系，那么远程分支名也可以省略' },
+    { lines: [9], notes: '如果当前版本库只存在一个fetch url，那么远程名也可以省略' },
+    { lines: [10], notes: '使用git rebase来代替git merge，至于为什么要使用rebase来代替merge，接下里会详细的讲明' }
+  ]}
+/>
 ---
 
 <CodeSurfer
   theme={nightOwl}
+  title="git push"
   lang="json"
   code={`
-  {
-    "husky": {
-      "hooks": {
-        "pre-commit": "lint-staged"
-      }
-    },
-    "lint-staged": {
-      "*.js": [
-        "prettier --write",
-        "standard --fix",
-        "git add"
-      ],
-      "*.{json,md}": [
-        "prettier --write",
-        "git add"
-      ]
-    }
-  }
-  `}
+  git push [<repository> [<refspec>...]]
+  git push -u origin master
+  git push origin master
+  git push origin :dev
+  git push origin -d dev
+  git remote prune orgin
+  git fetch --prune`}
+  steps={[
+    { notes: '' },
+    { lines: [2], notes: '完整用法  git push <远程主机名> <本地分支名>:<远程分支名>' },
+    { lines: [3], notes: '-u 是--set-upstream的简写，表示origin/master分支和local/master分支建立追踪关系，此后使用git push就是采用这种默认方式推送到origin/master分支上' },
+    { lines: [4], notes: '省略了远程分支名, 表示将本地分支推送到与之存在追踪关系的远程分支，通常是一个同名的分支， 如果远程没有该分支就会被创建' },
+    { range: [3,4], notes: '两个命令之间之间的区别是，-u将远程分支和本地分支建立了追踪关系，之后的推送无需指定repository和远程分支，反之不会建立追踪，下一次推送仍然要指定远程'},
+    { range: [5,6], notes: '删除origin/dev分支' },
+    { range: [7,8], notes: '在多人写协作开发下，如果其中一个小伙伴删除了远程的某个分支, git不会主动推送给其他的用户，所以其他用户需要手动检查更新' },
+    { range: [7,8], notes: '两条命令都能达到更新远程分支的效果,不同的是git fetch --prune在更新远程分支之后会fetch当前分支最新的代码'}
+  ]}
 />
 
 ---
 
-## 你清楚它们是如何运作的吗?
+### git status
+
+- 查看工作区的状态，这个命令可以看作是一种智能提示，因为这个命令不仅会显示working tree当前的状态，同时还会提示你下一步可能的操作。
+
+---
+
+### git merge VS git rebase
+
+---
+
+#### git merge
+
+<ul>
+  <Appear>
+  <li>git merge 是通过合并其他分支的histories来达到当前分支往前走的目的</li>
+  <li>git merge采用fast-forward和no-fast-forward两种方式进行合并，git会根据不同的情况采用不同的方式进行合并</li>
+  </Appear>
+</ul>
+
+---
+
+<span>这种情况下master分支相对于dev分支，只是简单的落后于dev分支，在dev分支前进的时间里，master分支没有产生其他的commit, 此时执行git merge dev是采用fast-forward,直接快进，不会产生一个新的commit节点</span>
+<div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center'
+  }}>
+  <Image src="./img/merge-fast.png" style={{
+    width: 300,
+    height: 375,
+  }}/>
+</div>
+
+---
+
+<span>此时在master分支相对于dev分支，不仅仅是简单的落后于dev分支，在dev分支前进的同时master分支也在前进，此时执行git merge dev就会产生一个新的commit节点来记录这一次的merge。</span>
+<div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center'
+  }}>
+  <Image src="./img/merge-no-fast.png" style={{
+    width: 550,
+    height: 375,
+  }}/>
+</div>
+
+---
+
+<span>值得注意的是，在fast-forword默认模式下，你可以使用--no-ff(no fast forward)来阻止快速合并，强制生成一条合并commit记录此次合并，但是在no-fast-forward默认模式下，不能强制更改为fast-forward合并。只能使用别的方式去合并，这便是下面要说的，rebase,变基。</span>
+
+---
+
+#### git rebase
+
+<ul>
+  <Appear>
+  <span>git rebase通过变基的方式,改变当前分支的初始commit,然后在新的base上一个一个地运行这个分支上的所有commits。</span>
+  </Appear>
+</ul>
+
+---
+
+<span>例如上面这种情况，可能因为你的同事在master上改了bug，或者开发了新的功能上传到了master，你开发的功能依赖你同事开发的部分，所以这时候你需要让代码合并起来，如果此时使用merge的话，一定会产生一条merge树，这样非常丑。</span>
+<div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center'
+  }}>
+  <Image src="./img/rebase-branch.jpeg" style={{
+    width: 770,
+    height: 375,
+  }}/>
+</div>
 
 ---
 
@@ -130,204 +305,361 @@ Combine with `husky` & `lint-staged` in git hooks like `pre-commit`.
   theme={nightOwl}
   lang="bash"
   code={`
-    eslint . --fix
+    git checkout master
+    git pull
+    git checkout dev
+    git rebase master
   `}
+  steps={
+    [{notes: '为了避免产生丑陋不必要的merge节点，你可以使用rebase'}]
+  }
 />
 
-<Notes>
-  <li>当我们从命令行中键入 这串字符的时候 他背后实际上执行了什么样的操作呢，接下来我们就会稍微具体的讲下这个过程是如何实现的</li>
-  <li>在深入代码前，让我们说下 AST 这个东西。 </li>
-</Notes>
+---
+
+<span>dev分支本来是从commit C1这个节点上创建出来的分支，执行了git rebase master之后就变成了从commit C5节点上创建出来的分支，这就是变基的含义， 然后在将原本在dev上的两个提交C2和C3一个一个的运行在新的dev分支上。</span>
+<div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center'
+  }}>
+  <Image src="./img/rebase-branch-after.png" style={{
+    width: 800,
+    height: 450,
+  }}/>
+</div>
 
 ---
 
-### 开始制作一个简单 linter (BASE ON CSS)
+### 那到底什么时候用git merge, 什么时候用git rebase呢？
 
 ---
 
-export default Split
+### 为什要区分merge和rebase?
 
-使用 4 个分支讲述 linter 实现
-
-- step-1-base
-- step-2-cosmiconfig
-- step-3-cli
-- step-4-unittest
+<ul>
+  <Appear>
+  <li>使用merge合并分支，希望在git中留下当前local分支存在过的记录，即使以后那个分支删除了，还是能在git提交记录中找到那个分支开始和结束时间。</li>
+  <li>使用rebase整理分支，是不希望当前的local分支出现在提交树中，它并不具备有特殊的意义，自然也不需要留下痕迹，更不应该把提交树的提交搞得混乱不堪。</li>
+  </Appear>
+</ul>
 
 ---
 
-<Notes>
-  <li>为什么按照4个分支来讲，一般来说。</li>
-  <ol>转换函数</ol>
-  <ol>规则</ol>
-  <ol>有良好的信息输出，良好的信息输出标识，错误提示和修复建议 </ol>
-  <ol>可自定义配置文件 </ol>
-  <ol>cli, 命令行工具 </ol>
-  <ol>单元测试，随着功能增多，我们需要保证代码的质量</ol>
-  <li>接下来就用一些代码来讲述这个过程</li>
-</Notes>
+### 如何区分使用merge还是rebase?
 
-### step-1-base
+---
+
+### rebase黄金定律
+
+<ul>
+  <Appear>
+  <li>永远不要rebase一个已经分享的分支到非remote分支（比如rebase到master,develop,release分支上）</li>
+  <li>也就是说永远不要rebase一个已经在中央库中存在的分支,只能rebase你自己使用的私有分支</li>
+  </Appear>
+</ul>
+
+---
+### merge使用场景
+
+<ul>
+  <Appear>
+  <li>当前local分支存在具有特殊意义，比如说是需要展现一个功能开发过程的feature分支，或者是体现一个bug修复过程的bugfix分支，这些分支都应该体现在提交树中，因为它能完整的体现一段业务实现的过程，所以这些情况下，应该使用git merge localBranchName --no-ff</li>
+  <li>使用--no-ff来确保一定会生成一个merge commit，因为如果你要合并的分支在localBranch创建之后没有更改，那么git在merge的时候会采用fast-forward模式，这种模式不会产生merge commit，这样就达不到目的了，所以必须加上这个参数去确保merge commit的产生。</li>
+  <li>local branch的存在仅仅是为了开发的同时保持master分支的稳定（这里举例为master,实际上可能是其他你将要合并的分支),那么此时应该使用git rebase + merge来达到一个fast-forward 合并</li>
+  </Appear>
+</ul>
 
 ---
 
 <CodeSurfer
   theme={nightOwl}
-  title="selector-type-case"
-  lang="js"
-  code={require('!raw-loader!../snippets/selector-type-case.snippet.js').default}
-  steps={[
-    { notes: 'rules for css' },
-    { lines: [9], notes: 'walkRules for root' },
-    { lines: [10], notes: 'get description of selector' },
-    { lines: [11], notes: 'get tags of the selector description' },
-    { lines: [12], notes: 'get value' },
-    { range: [26, 32], notes: 'report message if not need fix' }
-  ]}
-/>
+  lang="bash"
+  code={`
+    git rebase master
+    git checkout master
+    git merge localBranchName
+  `}
+  steps={
+    [{range: [2, 4], notes: 'master分支从local branch创建之后有产生了新的提交'},
+    {range: [2, 4], notes: '那么local branch 需要先使用rebase来确保merge的时候采用fast-forward模式'},
+    {range: [2, 4], notes: '这里为什么不直接在master分支上rebase'},
+    {range: [2, 4], notes: '因为master分支上的提交已经在中央仓库中已经存在了，rebase会重写历史记录，这对于已经push完成的记录是不合理的。这样做也不符合之前说的rebase黄金定律'},
+  ]}/>
+---
+
+### why `git pull --rebase` ?
+
+<ul>
+  <Appear>
+  <li>pull命令是fetch和merge两条命令的简写</li>
+  <li>因为要执行git merge命令，所以就肯定会遇到典型的merge和rebase问题</li>
+  <li>使用--rebase是使用`git rebase`来代替`git merge`</li>
+  </Appear>
+</ul>
+
+---
+
+### 思考场景
+
+<ul>
+  <Appear>
+  <li>在dev分支，你commit了一些提交，这时候你的同事在dev分支上push了一些commit，接下来，你要push你的commit</li>
+  <li style={{ color: '#c5a5c5'}}>如果你直接push的话git会禁止你的push操作，它会提示你先pull再进行push操作，所以这时候需要先执行`git pull`</li>
+  <li>这时候就出现了经典merge和rebase场景问题，当origin/dev和你本地的dev分支进行merge的时候肯定会产生一条merge commit，并且留下一条不必要的树在git记录中</li>
+  <li style={{ color: '#c5a5c5'}}>但是这条merge记录是毫无意义的，甚至是多余的，只会让提交树变得难以辨别</li>
+  <li>使用rebase的话，将会重写整个histories，不要担心，只是重写你本地分支的history，并且不会残留不必要的记录，污染历史图谱，这个过程之前我们说的rebase黄金定律并不矛盾</li>
+  </Appear>
+</ul>
+
+---
+
+### git rebase的其他作用
+
+---
+
+### 思考场景
+
+1 我们在不同的分支上切换，开发，导致产生了一些不连续非必要的commit.
+
+2 我们可能需要一些连续的commit才完成一个bug的修复
+
+<ul>
+  <Appear>
+  <span style={{ color: '#c5a5c5'}}>如果我们都将上面这些commit全部push到远程仓库，会导致一个混乱的history产生，长期如此，history tree将混乱不堪，难以阅读，更难以被他人重用</span>
+  </Appear>
+</ul>
+
+---
+
+<span>为了避免这种情况，我们在push之前，先使用rebase将本地分支整理干净</span>
 
 ---
 
 <CodeSurfer
+  title={'git rebase -i'}
   theme={nightOwl}
-  title="reportMessage"
-  lang="js"
-  code={require('!raw-loader!../snippets/report.snippet.js').default}
-/>
-
----
-
-### step-2-cosmiconfig
-
-
-<Notes>
-  <li>前面看到有 .eslintrc .eslint.config.js 这些配置文件，里面定义的就是他的配置</li>
-</Notes>
-
-
----
-
-<CodeSurfer
-  theme={nightOwl}
-  title="SearchPlaces"
   lang="json"
   code={`
+    1 pick fabec5a add blog
+    2 pick 334c1ce temp commit
+    3 pick d2f6274 feat(git): add git doc
+    4
+    5 # Rebase 0132526..d2f6274 onto 0132526 (3 commands)
+    6 #
+    7 # Commands:
+    8 # p, pick <commit> = use commit
+    9 # r, reword <commit> = use commit, but edit the commit message
+  10 # e, edit <commit> = use commit, but stop for amending
+  11 # s, squash <commit> = use commit, but meld into previous commit
+  12 # f, fixup <commit> = like "squash", but discard this commit's log message
+  13 # x, exec <command> = run command (the rest of the line) using shell
+  14 # b, break = stop here (continue rebase later with 'git rebase --continue')
+  15 # d, drop <commit> = remove commit
+  16 # l, label <label> = label current HEAD with a name
+  17 # t, reset <label> = reset HEAD to a label
+  18 # m, merge [-C <commit> | -c <commit>] <label> [# <oneline>]
+  19 # .       create a merge commit using the original merge commit's
+  20 # .       message (or the oneline, if no original merge commit was
+  21 # .       specified). Use -c <commit> to reword the commit message.
+  22 #
+  23 # These lines can be re-ordered; they are executed from top to bottom.
+  24 #
+  25 # If you remove a line here THAT COMMIT WILL BE LOST.
+  26 #
+  27 # However, if you remove everything, the rebase will be aborted.
+  28 #
+  29 # Note that empty commits are commented out
+  `}
+  steps={
     [
-      'package.json'
-      '.eslintrc',
-      '.eslintrc.json',
-      '.eslintrc.yaml',
-      '.eslintrc.yml',
-      '.eslintrc.js'
-    ]
-  `}
+    {notes: '在工作区干净的前提下执行git rebase -i 命令，就会进入这个编辑界面, 注意commit以倒序排列'},
+    {range: [2,4], notes: '这三条commit希望能够整理成一个分支'},
+    {lines: [9], notes: '保留commit'},
+    {range: [10, 11], notes: '保留commit, 但是重新commit message'},
+    {lines: [12], notes: '以合并到前一条commit的方式保留, squash的commit前至少保留一个commit'},
+  ]}
 />
 
 ---
 
+### git reset
+
+- `git reset`将HEAD重置到某个特地的状态
+
+- `git reset`主要使用的有soft， mixed， hard三个模式，这三个模式区别之处在于影响的范围不一样
+
+---
 <CodeSurfer
   theme={nightOwl}
-  title="Get config"
   lang="js"
   code={`
-    const cosmiconfig = require('cosmiconfig')\n
-    function getConfig (configName = 'clint') {
-      const explorer = cosmiconfig(configName)
-      const searchResult = explorer.searchSync()
-      if (!searchResult) {
-        throw new TypeError('Please provide the config')
-      }
-      return searchResult.config
-    }
+    // 索引和工作区都不会被改变
+    git reset --sort commit/HEAD~4(表示当前HEAD前4个commit)
+    // 索引改变，工作区回到暂存之前的状态，这种也是git的默认方式
+    git reset --mixed commit/HEAD~4
+    // 索引和工作区都会回到给定提交的状态，新增的文件会被删除，被删除的文件还原
+    git reset --hard commit/HEAD~4
+    /* git reset是相对危险的命令
+    尤其是hard模式
+    当然这些更新都将只是针对local branch
+    如果这些还原要同步到origin
+    在没有改动到origin commit的前提下，直接push
+    但是在reset了origin commit的情况下
+    需要使用git push -f(--force)来执行推送。
+    git reset --hard和git push -f是极其危险的操作
+    一旦重置，原来的记录就找不回，所以不推荐在开发过程中使用 */
   `}
-  steps={[
-    { notes: 'get config for our custom name `clint`' },
-    { lines: [5], notes: 'init explorer' },
-    { lines: [8], notes: 'throw an error' }
-  ]}
 />
-
 ---
 
-### step-3-cli
+### git revert
 
+- 回到一个给定提交之前的状态，并产生一个新的提交来记录这个操作
+- `git reset`是让HEAD往后退，它改写了history, `git revert`是让HEAD往前走，生成一个新的commit来记录这一次的反转，相对而言，reset更加危险。
 ---
-
 <CodeSurfer
+  title="git cherry-pick"
   theme={nightOwl}
-  title="Init CLI"
   lang="js"
   code={`
-    #!/usr/bin/env node
-    const cac = require('cac')
-    const { version } = require('./package.json')
-    const main = require('./src/index')
-    const cli = cac()\n
-    cli
-      .command('<files>', 'use globby pattern match the files')
-      .option('--config <configPath>', 'specify the clint config')
-      .option('--fix', 'fix the error')
-      .allowUnknownOptions()
-      .action((path, options) => {
-        main(path, options)
-      })\n
-    cli.help()
-    cli.version(version)
-    cli.parse()
+    /* 将你需要的commit的sha1写在命令后面
+    这样你所选择的那些commit就会出现在当前的分支上
+    当然，commit记录不会出现在这个branch tree上
+    但是会产生一个新的commit来进行提交 */
+    git cherry-pick [commidSha1, [commidSha1...]]
+    /* 你也可以选择一个commit区间
+    它的范围就是 startCommidSha1 到 endCommidSha1 之间所有的commit
+    但是它这是一个 (左开，右闭] 的区间
+    也就是说，它将不会包含 startCommidSha1 的 commit。*/
+    git cherry_pick <startCommidSha1>…<endCommidSha1>
+    // 如果想要包含 startCommidSha1 的话，就需要使用 ^ 标记一下，就会变成一个 [左闭，右闭] 的区间
+    git cherry-pick <startCommidSha1>^...<endCommidSha1>
   `}
-  steps={[
-    { lines: [9], notes: 'specify input files' },
-    { range: [10, 12], notes: 'accept options' }
-  ]}
+  steps={[{notes: '从其他分支的挑选出你需要的commits， 移植到当前分支，产生一个新的commit来进行提交.'}]}
 />
+---
+
+## Gitflow work
+Gitflow工作流是经典模型，是工作流的经验和精髓。尤其是当项目复杂化，就越能感受到这个工作流的智慧和魅力。
+
+---
+### 当下主要的工作流方式
+<ul>
+  <Appear>
+  <li>集中式工作流</li>
+  <li>功能分支工作流</li>
+  <li>Gitflow 工作流</li>
+  </Appear>
+</ul>
+---
+### 集中式工作流
+<ul>
+  <Appear>
+  <li>这个是参考SVN产生的一个工作模型，线上只维护一个分支，就是主分支master，所以的开发者都基于这个分支进行commit</li>
+  <li>这种模式的好处就是，完全照搬了SVN工作模式，SVN用户不需要额外学习git就能上手。但是这完全没有使用git分布式协作的优点，所以这种方式极少采用。</li>
+  </Appear>
+</ul>
+---
+
+### 功能分支工作流
+<ul>
+  <Appear>
+  <li>featrue模型，这个模型在集中式的基础上给妹个新功能开发建立一个专门的分支，这样既隔离了多个开发者的功能开发，不会弄乱代码，又保证了开发期间master分支的稳定性，但同时这种方式也具有足够的灵活性。</li>
+  <li>功能开发隔离让pull requests工作流成为可能，每一个功能完成要合并到master前都需要提交pull request，团队伙伴review之后再选择是否merge</li>
+  <li>featrue分支是否推送到中央仓库都可以，由于master是仅有的一个「特殊」分支，在中央仓库上存多个功能分支不会有任何问题</li>
+  </Appear>
+</ul>
 
 ---
 
-### step-4-unittest
+### Gitflow 工作流
+
+<ul>
+  <Appear>
+  <li>Gitflow工作流是管理功能开发、发布准备和维护的常用模式。相对于其他两种模型，Gitflow相对复杂和繁琐，但是对于大型复杂项目，这种模式往往是最合理的。</li>
+  <li>Gitflow模型是master-develop-release， master仍然作为主分支，develop作为开发分支，release承担着预发布的责任。这种模型下，master和dev都是需要长期维护的分支，release、hotfix、featrue这三种分支都是短期分支，发布结束，bug修复结束，功能开发结束便会删除。</li>
+  </Appear>
+</ul>
 
 ---
 
-<CodeSurfer
-  theme={nightOwl}
-  title="Add unit test"
-  lang="js"
-  code={require('!raw-loader!../snippets/test.snippets.js').default}
-  steps={[
-    { notes: 'add test' },
-    { tokens: { 3: [4, 5, 6, 7, 8, 9] } },
-    { tokens: { 9: [3, 4, 5, 6, 7] } }
-  ]}
-/>
+### Gitflow 工作流的使用
+
+1 功能开发
+
+2 发布测试
+
+3 维护分支
+
+---
+### 功能开发
 
 ---
 
-<CodeSurfer
-  theme={nightOwl}
-  lang="diff"
-  code={require('!raw-loader!../snippets/diff').default}
-  steps={[
-    { range: [1, 2], notes: '`A` tag was transformed to lower case' },
-    { range: [7, 8], notes: '`UL LI` tags were transformed to lower case' }
-  ]}
-/>
+<span style={{ fontSize: '20px'}}>功能开发过程类似功能分支工作流模型，每一个新功能都用一个新的featrue分支开发，但是不同的是，featrue不是从master上创建的，而是从dev分支上创建。feature从来不会和master分支交互。功能分支上的功能开发完成之后合并到dev分支</span>
+<div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center'
+  }}>
+  <Image src="./img/gitflow-featrue.png" style={{
+    width: 1200,
+    height: 450,
+  }}/>
+</div>
 
 ---
 
-
-1. 你使用过哪些 linter ?
-
-2. 你知道如何使用它们吗?
-
-3. 你清楚它们是如何运作的吗?
-
-4. 制作一个简化版的 linter.
+### 发布测试
 
 ---
 
-### [https://lint.eliaztray.cn](https://lint.eliaztray.cn)
+<li style={{ fontSize: '18px'}}>一旦dev分支上拥有了一次发布所需要的所有功能，就从dev分支上创建一个release发布分支，来完成之后的发布流程。release不会再合并新的功能，它只做bug修复、文档生成以及其他面向发布任务的事情。直到测试完成，发布工作全部完成之后，打好tag， 合并到master分支，完成上线。</li>
+<li style={{ fontSize: '18px'}}>完成发布之后，release分支自创建依赖产生了一些commit，需要合并回dev分支</li>
+<li style={{ fontSize: '18px'}}>这个发布分支的存在让发布流程和其他新功能开发流程可以同时进行，相互不受影响。</li>
+<div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center'
+  }}>
+  <Image src="./img/gitflow-release.png" style={{
+    width: 1000,
+    height: 500,
+  }}/>
+</div>
 
-### [https://github.com/eliaztray/lint-demo](https://github.com/eliaztray/lint-demo)
+---
 
+### 维护分支
+
+---
+
+<span>维护分支，hotfix分支就是上线之后用于上线后给产品快速打补丁，hotfix也是唯一从master主分支创建出来的分支,它测试完成之后需要合并到master和dev分支， master分支上要打好tag重新发布</span>
+<div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center'
+  }}>
+  <Image src="./img/gitflow-hotfix.png" style={{
+    width: 800,
+    height: 450,
+  }}/>
+</div>
+
+---
+### 参考资料
+#### https://www.cnblogs.com/kidsitcn/p/5339382.html
+
+#### https://github.com/geeeeeeeeek/git-recipes
+
+#### https://github.com/521xueweihan/git-tips#展示帮助信息
+
+#### https://github.com/oldratlee/translations/blob/master/git-workflows-and-tutorials/README.md
 ---
 
 # Thank You!

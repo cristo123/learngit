@@ -7,14 +7,11 @@ module.exports = [
   {
     test: /\.css$/,
     use: ['style-loader', 'css-loader']
+  },
+  {
+    test: /\.png$/,
+    use: {
+      loader: 'file-loader'
+    }
   }
-  // {
-  //   test: /\.js$/,
-  //   use: {
-  //     loader: 'babel-loader',
-  //     options: {
-  //       presets: ['@babel/preset-env', '@babel/preset-react']
-  //     }
-  //   }
-  // }
 ]

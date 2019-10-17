@@ -23,9 +23,7 @@ export default Layout
 
 2. Git的基本命令
 
-3. Git几大工作流对比
-
-4. 选择适合的Git工作流
+3. 工作流基本介绍
 
 ---
 <!-- 
@@ -65,40 +63,44 @@ export default Split
 - git branch
 - git checkout
 ##
+- git status
+- git log
 - git merge
 - git rebase
 - git reset
 - git revert
 - git cherry-pick
 - git diff
-- git describe
-
+...
 
 ---
 
 ### git相关的一些基本概念
 
+<Appear>
+  <li>工作区/工作目录</li>
+  <li>暂存区/索引</li>
+  <li>Git仓库</li>
+</Appear>
+
 ---
 
 ### 工作区(working tree / working directory)
 
+- 工作区是对项目的某个版本独立提取出来的内容，这些从git仓库的压缩数据库中提取出来的文件放在磁盘上供你使用和修改
+
 ---
 
 ### 暂存区 / stage / 索引 / index
-<ul>
-  <Appear>
-  <li>暂存区是Git中的重要概念，当对工作区修改/新增/删除文件执行git add 命令之后，就会产生一个新com纪录存入暂存区中</li>
-  </Appear>
-</ul>
+
+- 暂存区是一个名为index文件，在git仓库中，保存了下次将提交的文件列表信息
+- 当对工作区修改/新增/删除文件执行git add 命令之后，就会产生一个新纪录存入暂存区中
 
 ---
 
 ### 版本库
-<ul>
-  <Appear>
-  <li>当你执行了`git init`命令之后，会产生一个隐藏文件，`.git`，这个就是版本库</li>
-  </Appear>
-</ul>
+
+- .git隐藏文件夹就是我们所说的Git仓库，也称之为版本库，我们拷贝其他仓库的时候就是拷贝这个文件夹。这个文件夹中保存了项目的元数据和对象数据库
 
 ---
 
@@ -125,7 +127,7 @@ export default Split
     { lines: [3], notes: "HEAD是一个游标，当我们创建版本库的时候，git会主动为我们传创建一个分支，master, 此时HEAD指向master最近的一个提交,如果你切换到dev分支了，那么HEAD指向的就是dev分支最近的一个提交" },
     { lines: [4], notes: "ORIG_HEAD保存的也是提交记录的sha1，当执行一些风险操作的时候，比如rebase，reset或merge的时候，Git会将原来HEAD执行的commit保存在ORIG_HEAD中。" },
     { lines: [7], notes: "hooks,顾名思义，钩子，里面存放了多种钩子文件，都是.sample后缀，是示例文件，不生效，去掉.sample后缀才生效，比如pre-commit.sample文件，这个钩子在执行`git commit`之前被调用，我们在项目中使用的husky+lint-staged就是改了这个钩子文件来实现提交前的校验" },
-    { lines: [8], notes: "index即暂存区" },
+    { lines: [8], notes: "index即暂存区，保存了下次将提交的文件列表信息" },
     { lines: [11], notes: "objects存放了所有的git对象" },
     { lines: [12], notes: "refs保存了各个本地分支和远程分支以及tags当前所指向的提交，HEAD和refs的关系： HEAD -> refs/heads/branchName -> commit" },
   ]}
@@ -133,6 +135,15 @@ export default Split
 
 ---
 
+## 运行Git前
+
+1 安装Git
+
+2 配置用户和邮箱地址，之后的每一次提交Git都会携带这些信息。
+
+3 配置ssh key， 避免每次push代码到服务器的时候要输密码。
+
+---
 ### git init
 
 <ul>
@@ -149,6 +160,7 @@ export default Split
 - `git clone path/to/repository`
 - 从远端服务器上克隆一个版本库 
 - `git clone username@host:/path/to/repository`
+- git主要使用协议，本地协议，http协议，git协议，ssh协议，http协议是最方便的，git协议是最快的。
 
 ---
 ### git add
@@ -167,6 +179,27 @@ export default Split
 - `git commit -m "commit message"`
 - 修改最近一次提交的提交信息
 - `git commit --amend`
+---
+### 在Git中，任何已提交的东西几乎都是可以恢复的，但是那些未提交丢失之后就无法恢复了
+---
+git log & git reflog
+
+- git log 查看提交历史
+- git reflog 查看操作历史
+---
+### 远程仓库
+
+- 托管在因特网或其他网络中的你的项目的版本库
+
+- 你的项目可以只有一个远程仓库，也可以有多个远程仓库
+---
+git remote
+
+- git remote -v 查看远程仓库
+
+- git remote add 添加远程库
+
+- git remote rm 删除远程仓库
 ---
 <Notes>Fetch from and integrate with another repository or a local branch，从另一个仓库或者本地分支获取并与之集成</Notes>
 <CodeSurfer
@@ -218,13 +251,6 @@ export default Split
     { range: [7,8], notes: '两条命令都能达到更新远程分支的效果,不同的是git fetch --prune在更新远程分支之后会fetch当前分支最新的代码'}
   ]}
 />
-
----
-
-### git status
-
-- 查看工作区的状态，这个命令可以看作是一种智能提示，因为这个命令不仅会显示working tree当前的状态，同时还会提示你下一步可能的操作。
-
 ---
 
 ### git merge VS git rebase
@@ -539,6 +565,13 @@ export default Split
   `}
   steps={[{notes: '从其他分支的挑选出你需要的commits， 移植到当前分支，产生一个新的commit来进行提交.'}]}
 />
+---
+Git分支
+
+- 使用分支的目的是，将我们的工作从开发主线中分离出来，以保证开发主线的稳定。
+
+- 分支是Git的强大存在，是所有的工作流模型存在的基础。
+
 ---
 
 ## Gitflow work

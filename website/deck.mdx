@@ -534,8 +534,7 @@ git remote
     在没有改动到origin commit的前提下，直接push
     但是在reset了origin commit的情况下
     需要使用git push -f(--force)来执行推送。
-    git reset --hard和git push -f是极其危险的操作
-    一旦重置，原来的记录就找不回，所以不推荐在开发过程中使用 */
+    git reset --hard和git push -f是极其危险的操作 */
   `}
 />
 ---
@@ -566,12 +565,66 @@ git remote
   steps={[{notes: '从其他分支的挑选出你需要的commits， 移植到当前分支，产生一个新的commit来进行提交.'}]}
 />
 ---
+git diff
+
+- git diff
+
+- git diff --cache
+
+- git diff commit-id commit-id
+
+- git diff HEAD
+---
+git stash
+
+- git stash
+
+- git stash -u
+
+- git stash list
+
+- git stash pop
+
+- git stash apply <stash@{n}>
+
+- git stash clear
+---
 Git分支
 
 - 使用分支的目的是，将我们的工作从开发主线中分离出来，以保证开发主线的稳定。
 
 - 分支是Git的强大存在，是所有的工作流模型存在的基础。
 
+---
+
+git branch
+
+- git checkout -b localBranchName
+
+- git branch -a
+
+- git remote show origin
+
+- git branch -d localBranchName
+
+- git push origin -d originName
+
+---
+git tag
+
+- git tag / git tag -l
+
+- git tag -ln
+
+- git tag -a <tag-version> -m "标签信息" <commit-id>
+
+- git push origin <tag-version>
+
+- git push --tags
+
+- git tag -d <tag-version>
+
+- git push origin :refs/tags/<tag-version>
 ---
 
 ## Gitflow work
